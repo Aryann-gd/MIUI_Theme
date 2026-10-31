@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POCO M6 5G (720x1650) - MAML Lockscreen Simulator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            background: #0f1117;
+            color: #e6ebf2;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 40px;
+        }
+        #phone-frame {
+            width: 360px;
+            height: 825px; /* Exact 1:2 scale of 720x1650 */
+            border-radius: 40px;
+            overflow: hidden;
+            border: 8px solid #2d3342;
+            position: relative;
+            background: #0a0d12;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(255,46,46,0.15);
+        }
+        #phone-screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-size: cover;
+            cursor: grab;
+        }
+        #phone-screen:active { cursor: grabbing; }
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 22px;
+            background: #2d3342;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 100;
+        }
+        .status-bar {
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #a0a6b2;
+            z-index: 90;
+            pointer-events: none;
+        }
+        #clock-group {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 110px; /* 220px @ 1:2 scale */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        #date-text {
+            font-size: 16px;
+            color: #b0b8c4;
+            margin-bottom: -15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        #clock-text {
+            font-size: 200px; /* 400px @ 1:2 scale */
+            font-family: Impact, "Arial Black", sans-serif;
+            color: #e6ebf2;
+            letter-spacing: -6px;
+            line-height: 0.85;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #clock-dot {
+            font-size: 45px;
+            color: #b0b8c4;
+            margin-top: 10px;
+        }
+        .widgets-row {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            pointer-events: none;
+        }
+        .widget-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(30, 36, 48, 0.65);
+            border: 2px solid rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .shortcuts-row {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .shortcut-btn {
+            width: 32px;
+            height: 32px;
+            color: white;
+            opacity: 0.9;
+        }
+        .gesture-pill {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+        #debug-panel {
+            width: 360px;
+            background: #181c25;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #2a3140;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        h2 { font-size: 18px; color: #ff2e2e; }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 8px 10px;
+            background: #0f1218;
+            border-radius: 6px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-locked { background: #5c1818; color: #ff7878; }
+        .badge-unlocked { background: #184a25; color: #78ffa1; }
+    </style>
+</head>
+<body>
+
+    <div id="phone-frame">
+        <div class="notch"></div>
+        <div class="status-bar">
+            <span>POCO M6 5G</span>
+            <span>100% ⚡</span>
+        </div>
+
+        <div id="phone-screen">
+            <!-- Swipe-reactive clock -->
+            <div id="clock-group">
+                <div id="date-text">26/03/20 Friday</div>
+                <div id="clock-text">
+                    <span id="hours">02</span>
+                    <span id="clock-dot">•</span>
+                    <span id="minutes">36</span>
+                </div>
+            </div>
+
+            <!-- Circular widgets -->
+            <div class="widgets-row">
+                <div class="widget-circle">⏳</div>
+                <div class="widget-circle">20<br>Fri</div>
+                <div class="widget-circle">👤</div>
+            </div>
+
+            <!-- Bottom shortcuts -->
+            <div class="shortcuts-row">
+                <div class="shortcut-btn">📷</div>
+                <div class="shortcut-btn">🔦</div>
+            </div>
+            <div class="gesture-pill"></div>
+        </div>
+    </div>
+
+    <div id="debug-panel">
+        <h2>MAML Variable Monitor (1:1 Logic)</h2>
+        <p style="font-size: 12px; color: #8e97a8;">Drag screen up/down to test damping, scaling, alpha fading, and spring-back recovery.</p>
+        
+        <div class="data-row">
+            <span>Lockscreen State:</span>
+            <span id="dbg-state" class="status-badge badge-locked">LOCKED</span>
+        </div>
+        <div class="data-row">
+            <span>#touch_y:</span>
+            <span id="dbg-touch-y">0 px</span>
+        </div>
+        <div class="data-row">
+            <span>#touch_begin_y:</span>
+            <span id="dbg-touch-begin-y">0 px</span>
+        </div>
+        <div class="data-row">
+            <span>#touch_drag:</span>
+            <span id="dbg-drag">0 px</span>
+        </div>
+        <div class="data-row">
+            <span>#clock_y_offset:</span>
+            <span id="dbg-offset">0.0 px</span>
+        </div>
+        <div class="data-row">
+            <span>#clock_scale:</span>
+            <span id="dbg-scale">1.000</span>
+        </div>
+        <div class="data-row">
+            <span>#clock_alpha:</span>
+            <span id="dbg-alpha">255</span>
+        </div>
+        <div class="data-row">
+            <span>Unlock Threshold:</span>
+            <span>drag &lt; -260 px</span>
+        </div>
+
+        <button onclick="resetLock()" style="margin-top: 10px; padding: 10px; background: #ff2e2e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Reset Lock State</button>
+    </div>
+
+    <script>
+        const screen = document.getElementById('phone-screen');
+        const clockGroup = document.getElementById('clock-group');
+        const dbgState = document.getElementById('dbg-state');
+        const dbgTouchY = document.getElementById('dbg-touch-y');
+        const dbgTouchBeginY = document.getElementById('dbg-touch-begin-y');
+        const dbgDrag = document.getElementById('dbg-drag');
+        const dbgOffset = document.getElementById('dbg-offset');
+        const dbgScale = document.getElementById('dbg-scale');
+        const dbgAlpha = document.getElementById('dbg-alpha');
+
+        let isTouching = false;
+        let touchBeginY = 0;
+        let touchY = 0;
+        let clockOffset = 0;
+        let releaseOffset = 0;
+        let animId = null;
+        let isUnlocked = false;
+
+        function updateClockDisplay() {
+            const now = new Date();
+            document.getElementById('hours').textContent = String(now.getHours()).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(now.getMinutes()).padStart(2, '0');
+        }
+        setInterval(updateClockDisplay, 1000);
+        updateClockDisplay();
+
+        function renderFrame(offsetY) {
+            const absOffset = Math.abs(offsetY);
+            // Math matches MAML manifest: max(120, 255 - abs * 0.75), max(0.88, 1 - abs * 0.0007)
+            const alpha = Math.max(120, 255 - (absOffset * 0.75));
+            const scale = Math.max(0.88, 1 - (absOffset * 0.0007));
+
+            clockGroup.style.transform = `translateY(${offsetY * 0.5}px) scale(${scale})`;
+            clockGroup.style.opacity = alpha / 255;
+
+            dbgOffset.textContent = (offsetY).toFixed(1) + ' px';
+            dbgScale.textContent = scale.toFixed(3);
+            dbgAlpha.textContent = Math.round(alpha);
+        }
+
+        screen.addEventListener('pointerdown', (e) => {
+            if (isUnlocked) return;
+            if (animId) cancelAnimationFrame(animId);
+            isTouching = true;
+            // Native 1650 coordinate scale
+            const rect = screen.getBoundingClientRect();
+            touchBeginY = (e.clientY - rect.top) * 2;
+            touchY = touchBeginY;
+
+            dbgTouchBeginY.textContent = Math.round(touchBeginY) + ' px';
+            dbgTouchY.textContent = Math.round(touchY) + ' px';
+            dbgDrag.textContent = '0 px';
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isTouching) return;
+            const rect = screen.getBoundingClientRect();
+            touchY = (e.clientY - rect.top) * 2;
+            const rawDrag = touchY - touchBeginY;
+            
+            // Damping logic from MAML: max(-220, min(140, drag * 0.4))
+            clockOffset = Math.max(-220, Math.min(140, rawDrag * 0.4));
+            
+            dbgTouchY.textContent = Math.round(touchY) + ' px';
+            dbgDrag.textContent = Math.round(rawDrag) + ' px';
+            renderFrame(clockOffset);
+        });
+
+        function springBack(fromOffset) {
+            const startTime = performance.now();
+            const duration = 350; // ms
+
+            function easeOutBack(t) {
+                const c1 = 1.70158;
+                const c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+            }
+
+            function loop(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(1, elapsed / duration);
+                const easedT = easeOutBack(progress);
+                
+                const curOffset = fromOffset * (1 - Math.min(1.15, easedT));
+                renderFrame(curOffset);
+
+                if (progress < 1) {
+                    animId = requestAnimationFrame(loop);
+                } else {
+                    renderFrame(0);
+                    dbgDrag.textContent = '0 px';
+                }
+            }
+            animId = requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isTouching) return;
+            isTouching = false;
+            const rawDrag = touchY - touchBeginY;
+
+            if (rawDrag < -260) {
+                // Swipe-up unlock threshold reached
+                isUnlocked = true;
+                dbgState.textContent = 'UNLOCKED';
+                dbgState.className = 'status-badge badge-unlocked';
+                clockGroup.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                clockGroup.style.transform = 'translateY(-300px) scale(0.8)';
+                clockGroup.style.opacity = '0';
+            } else {
+                // Spring back
+                springBack(clockOffset);
+            }
+        });
+
+        function resetLock() {
+            isUnlocked = false;
+            dbgState.textContent = 'LOCKED';
+            dbgState.className = 'status-badge badge-locked';
+            clockGroup.style.transition = 'none';
+            renderFrame(0);
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,47 @@
+{
+  "device": {
+    "model": "POCO M6 5G",
+    "width": 720,
+    "height": 1650,
+    "refresh_rate": 90,
+    "target_fps": 30
+  },
+  "palette": {
+    "background_base": "#0A0D12",
+    "background_elevated": "#141923",
+    "clock_fill": "#E6EBF2",
+    "clock_shadow": "#40000000",
+    "accent_crimson": "#FF2E2E",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#B0B8C4",
+    "widget_fill": "#331E2430",
+    "widget_border": "#FFFFFF"
+  },
+  "typography": {
+    "clock_font": "Antonio-Bold.ttf",
+    "clock_font_license": "SIL Open Font License 1.1",
+    "clock_font_size": 440,
+    "date_font_size": 32,
+    "widget_font_size": 28
+  },
+  "safe_areas": {
+    "status_bar_top": { "x": 0, "y": 0, "w": 720, "h": 110 },
+    "gesture_bar_bottom": { "x": 0, "y": 1530, "w": 720, "h": 120 }
+  },
+  "layout": {
+    "date": { "x": 360, "y": 125, "align": "center" },
+    "clock": { "x": 360, "y": 190, "w": 600, "h": 460, "align": "center" },
+    "widgets": {
+      "diameter": 120,
+      "left": { "cx": 190, "cy": 1350 },
+      "center": { "cx": 360, "cy": 1350 },
+      "right": { "cx": 530, "cy": 1350 }
+    },
+    "shortcuts": {
+      "camera": { "x": 110, "y": 1490, "w": 48, "h": 48 },
+      "flashlight": { "x": 610, "y": 1490, "w": 48, "h": 48 }
+    },
+    "icon_canvas_size": 192
+  }
+}
+

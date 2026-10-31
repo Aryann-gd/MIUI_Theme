@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MIUI-Theme>
+    <title>Sukuna Crimson</title>
+    <author>Aryann-gd</author>
+    <designer>Aryann-gd</designer>
+    <version>1.0.0</version>
+    <uiVersion>16</uiVersion>
+    <miuiAdapterVersion>4.0</miuiAdapterVersion>
+    <description>Dynamic reactive lockscreen and bootanimation customized for POCO M6 5G running HyperOS 2.0.</description>
+</MIUI-Theme>
+

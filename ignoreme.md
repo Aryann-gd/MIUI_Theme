@@ -1,0 +1,1 @@
+1.exact os version - xiaomi hyper os 2.0.207.0.VGQINXM  android version 15 (AP3A.240905.015.A20)    2.customization for now just lock screen and bootanimation    3.reference style in provided image
