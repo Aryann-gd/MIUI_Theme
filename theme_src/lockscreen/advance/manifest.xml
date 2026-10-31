@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Lockscreen version="1" frameRate="30" screenWidth="720" displayDesktop="false">
     <!-- ================================================================= -->
-    <!-- Variables: Touch tracking, drag computation, spring dynamics     -->
+    <!-- Variables                                                         -->
     <!-- ================================================================= -->
     <Var name="touch_begin_y" type="number" expression="0" />
     <Var name="touch_drag" type="number" expression="0" />
     <Var name="is_touching" type="number" expression="0" />
     <Var name="release_offset" type="number" expression="0" />
 
-    <!-- Spring-back controller variable: 0 -> 1 on release with BackEaseOut -->
     <Var name="spring_t" type="number">
         <VariableAnimation name="spring_anim" initPause="true" loop="false">
             <AniFrame value="0" time="0" />
@@ -16,56 +15,60 @@
         </VariableAnimation>
     </Var>
 
-    <!-- Computed animated Y offset: clamped drag while touching, damped release when released -->
-    <Var name="clock_offset_raw" type="number" expression="max(-220, min(140, #touch_drag * 0.4))" />
+    <Var name="clock_offset_raw" type="number" expression="max(-180, min(120, #touch_drag * 0.4))" />
     <Var name="clock_y_offset" type="number" expression="ifelse(#is_touching, #clock_offset_raw, #release_offset * (1 - #spring_t))" />
     <Var name="clock_abs_offset" type="number" expression="abs(#clock_y_offset)" />
-    <Var name="clock_alpha" type="number" expression="max(120, 255 - (#clock_abs_offset * 0.75))" />
-    <Var name="clock_scale" type="number" expression="max(0.88, 1 - (#clock_abs_offset * 0.0007))" />
+    <Var name="clock_alpha" type="number" expression="max(140, 255 - (#clock_abs_offset * 0.6))" />
+    <Var name="clock_scale" type="number" expression="max(0.90, 1 - (#clock_abs_offset * 0.0005))" />
 
     <!-- ================================================================= -->
-    <!-- Layer 0: Static Wallpaper Canvas (720 x 1650)                     -->
+    <!-- Layer 0: Full-bleed background wallpaper                          -->
     <!-- ================================================================= -->
     <Image x="0" y="0" w="720" h="1650" src="bg.png" />
 
     <!-- ================================================================= -->
-    <!-- Layer 1: Swipe-Reactive Clock & Date Group                        -->
+    <!-- Layer 1: Date (above clock, clear area)                           -->
     <!-- ================================================================= -->
-    <Group x="360" y="220 + #clock_y_offset" alpha="#clock_alpha" scale="#clock_scale" pivotX="0" pivotY="0">
-        <!-- Date Display: e.g. 26/03/20 Friday -->
-        <DateTime x="0" y="-85" color="#B0B8C4" size="32" align="center" format="dd/MM/yy EEEE" />
-
-        <!-- Hours: Antonio condensed font -->
-        <DateTime x="-140" y="0" color="#E6EBF2" size="440" align="center" fontPath="clock.ttf" format="HH" />
-
-        <!-- Center Divider Dot: • -->
-        <Text x="0" y="160" color="#B0B8C4" size="90" align="center" text="•" />
-
-        <!-- Minutes: Antonio condensed font -->
-        <DateTime x="140" y="0" color="#E6EBF2" size="440" align="center" fontPath="clock.ttf" format="mm" />
+    <Group x="360" y="110 + #clock_y_offset" alpha="#clock_alpha" scale="#clock_scale" pivotX="0" pivotY="0">
+        <DateTime x="0" y="0" color="#CCCCCC" size="30" align="center" format="dd/MM/yy  EEEE" />
     </Group>
 
     <!-- ================================================================= -->
-    <!-- Layer 2: Circular Information Widgets (Y = 1290, safe above nav)  -->
+    <!-- Layer 2: LARGE time digits (behind character)                     -->
+    <!-- Reference style: massive condensed digits spanning full width     -->
+    <!-- Positioned so the character overlaps the lower half of digits     -->
     <!-- ================================================================= -->
-    <!-- Left: Hourglass Widget -->
-    <Image x="130" y="1290" w="120" h="120" src="widget_timer.png" />
-
-    <!-- Center: Calendar Gauge Widget with Day and Weekday -->
-    <Image x="300" y="1290" w="120" h="120" src="widget_calendar.png" />
-    <DateTime x="360" y="1328" color="#FFFFFF" size="30" align="center" format="d" />
-    <DateTime x="360" y="1362" color="#B0B8C4" size="22" align="center" format="EEE" />
-
-    <!-- Right: Profile Shortcut Widget -->
-    <Image x="470" y="1290" w="120" h="120" src="widget_profile.png" />
+    <Group x="360" y="220 + #clock_y_offset" alpha="#clock_alpha" scale="#clock_scale" pivotX="0" pivotY="0">
+        <!-- Hours and minutes side by side, massive size -->
+        <DateTime x="-10" y="0" color="#D8DEE8" size="480" align="center" fontPath="clock.ttf" format="HH:mm" />
+    </Group>
 
     <!-- ================================================================= -->
-    <!-- Layer 3: System Quick Actions (Y = 1490, 48x48)                   -->
+    <!-- Layer 3: Character foreground overlay (sits ON TOP of clock)      -->
+    <!-- This creates the parallax depth: digits behind, character front   -->
     <!-- ================================================================= -->
-    <!-- Camera Shortcut (Bottom-Left) -->
-    <Button x="110" y="1490" w="48" h="48">
+    <Image x="0" y="350" w="720" h="1100" src="fg_character.png" />
+
+    <!-- ================================================================= -->
+    <!-- Layer 4: Bottom widgets (frosted glass circles)                   -->
+    <!-- ================================================================= -->
+    <!-- Left: Timer/Do-not-disturb Widget -->
+    <Image x="150" y="1300" w="140" h="140" src="widget_timer.png" />
+
+    <!-- Center: Calendar Widget with date overlay -->
+    <Image x="290" y="1300" w="140" h="140" src="widget_calendar.png" />
+    <DateTime x="360" y="1340" color="#FFFFFF" size="34" align="center" format="d" />
+    <DateTime x="360" y="1380" color="#B0B8C4" size="22" align="center" format="EEE" />
+
+    <!-- Right: Profile Widget -->
+    <Image x="430" y="1300" w="140" h="140" src="widget_profile.png" />
+
+    <!-- ================================================================= -->
+    <!-- Layer 5: Bottom shortcuts (camera left, flashlight right)         -->
+    <!-- ================================================================= -->
+    <Button x="80" y="1510" w="64" h="64">
         <NormalState>
-            <Image x="0" y="0" w="48" h="48" src="icon_camera.png" />
+            <Image x="0" y="0" w="64" h="64" src="icon_camera.png" />
         </NormalState>
         <Triggers>
             <Trigger action="up">
@@ -75,10 +78,9 @@
         </Triggers>
     </Button>
 
-    <!-- Flashlight Toggle Shortcut (Bottom-Right) -->
-    <Button x="610" y="1490" w="48" h="48">
+    <Button x="576" y="1510" w="64" h="64">
         <NormalState>
-            <Image x="0" y="0" w="48" h="48" src="icon_torch.png" />
+            <Image x="0" y="0" w="64" h="64" src="icon_torch.png" />
         </NormalState>
         <Triggers>
             <Trigger action="up">
@@ -88,12 +90,10 @@
     </Button>
 
     <!-- ================================================================= -->
-    <!-- Layer 4: Interactive Gesture & Unlock Touch Surface               -->
-    <!-- Safe region: Y = 110 to 1530 (protects status bar and nav bar)    -->
+    <!-- Layer 6: Touch surface for swipe interaction                      -->
     <!-- ================================================================= -->
     <Button x="0" y="110" w="720" h="1420">
         <Triggers>
-            <!-- Finger Down: Record origin, reset motion, pause spring -->
             <Trigger action="down">
                 <VariableCommand name="touch_begin_y" expression="#touch_y" />
                 <VariableCommand name="touch_drag" expression="0" />
@@ -101,20 +101,16 @@
                 <Command target="spring_anim.animation" value="pause" />
             </Trigger>
 
-            <!-- Finger Move: Track raw drag distance -->
             <Trigger action="move">
                 <VariableCommand name="touch_drag" expression="#touch_y - #touch_begin_y" />
             </Trigger>
 
-            <!-- Finger Up: Evaluate unlock threshold or fire spring recovery -->
             <Trigger action="up">
                 <VariableCommand name="touch_drag" expression="#touch_y - #touch_begin_y" />
-                <!-- Swipe-up threshold reached (< -260 px): Unlock phone -->
                 <Trigger>
                     <Condition expression="#touch_drag &lt; -260" />
                     <ExternCommand command="unlock" />
                 </Trigger>
-                <!-- Released before threshold: initialize spring-back to 0 -->
                 <Trigger>
                     <Condition expression="#touch_drag &gt;= -260" />
                     <VariableCommand name="release_offset" expression="#clock_offset_raw" />
@@ -123,7 +119,6 @@
                 </Trigger>
             </Trigger>
 
-            <!-- Touch Cancel (e.g. system interruption, multi-touch conflict) -->
             <Trigger action="cancel">
                 <VariableCommand name="release_offset" expression="#clock_offset_raw" />
                 <VariableCommand name="is_touching" expression="0" />
@@ -132,10 +127,9 @@
         </Triggers>
     </Button>
 
-    <!-- Native System Unlock Fallback [UNTESTED ON DEVICE] -->
+    <!-- System Unlock Fallback -->
     <Unlocker name="system_unlocker" haptic="true" bounceInitSpeed="1000" bounceAcceleration="3000">
         <StartPoint x="0" y="1400" w="720" h="120" />
         <EndPoint x="0" y="1100" minDistance="260" />
     </Unlocker>
 </Lockscreen>
-
